@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/axondb
+    username: root
+    password: root
+  
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.MariaDB10Dialect
+    generate-ddl: true
+    properties:
+      hibernate:
+        ddl-auto: create-drop
+#        dialect: org.hibernate.dialect.MariaDB10Dialect
+        
+       
+axon:
+  serializer:
+    messages: jackson
+    general: jackson
+    events: jackson
