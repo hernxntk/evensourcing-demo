@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import pe.com.demo.book.api.request.DtoAddAuthorToBook;
 import pe.com.demo.book.api.request.DtoCreateBook;
 import pe.com.demo.book.domain.command.AddAuthorToBookCmd;
 import pe.com.demo.book.domain.command.CreateBookCmd;
+import pe.com.demo.book.domain.command.TransferBookCmd;
 
 @RestController
 @RequestMapping("/api")
@@ -28,7 +30,8 @@ public class BookController {
 	
 	@PostMapping(path = "/create-book")
 	public ResponseEntity<?> createBook(@RequestBody DtoCreateBook dto){
-		String idBook = "1";
+//		String idBook = "1";
+		String idBook = UUID.randomUUID().toString();
 		commandGateway.send(new CreateBookCmd(idBook, dto.getTitle(), dto.getPublish(), dto.getAuthors()));
 		return ResponseEntity.ok(idBook);
 	}
@@ -37,5 +40,11 @@ public class BookController {
 	public ResponseEntity<?> addAuthor(@RequestBody DtoAddAuthorToBook dto){
 		commandGateway.send(new AddAuthorToBookCmd(dto.getIdBook(), dto.getFullname()));
 		return ResponseEntity.ok(dto);
+	}
+	
+	@PostMapping(path = "/transfer-book/{idBook}")
+	public ResponseEntity<?> transferBook(@PathVariable String idBook){
+		commandGateway.send(new TransferBookCmd(idBook));
+		return ResponseEntity.ok(idBook);
 	}
 }
