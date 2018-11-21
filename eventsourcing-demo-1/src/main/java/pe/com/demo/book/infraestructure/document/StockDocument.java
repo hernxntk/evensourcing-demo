@@ -1,8 +1,5 @@
 package pe.com.demo.book.infraestructure.document;
 
-import java.util.Date;
-import java.util.List;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -12,21 +9,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Document("book")
-public class BookDocument {
+@AllArgsConstructor
+@Document("stock")
+public class StockDocument {
 
 	@Id
 	@Field
-	private String idBook;
+	private String idStock;
 	
 	@Field
-	private String title;
-	
-	@Field
-	private Date publish;
-	
-	@Field
-	private List<AuthorDocument> authors;
+	private Integer total;
 }

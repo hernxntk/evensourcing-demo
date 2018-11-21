@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventhandling.EventBus;
-import org.axonframework.eventhandling.GenericEventMessage;
+import static org.axonframework.eventhandling.GenericEventMessage.asEventMessage;
 import org.axonframework.modelling.command.Aggregate;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.axonframework.modelling.command.Repository;
@@ -13,10 +13,19 @@ import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
 import pe.com.demo.book.domain.command.AddAuthorToBookCmd;
+import pe.com.demo.book.domain.command.IncreaseStockCmd;
+import pe.com.demo.book.domain.command.RollbackIncreaseStockCmd;
+import pe.com.demo.book.domain.command.RollbackSaveAuthorQueryCmd;
+import pe.com.demo.book.domain.command.RollbackSaveBookQueryCmd;
+import pe.com.demo.book.domain.command.SaveAuthorQueryCmd;
 import pe.com.demo.book.domain.command.SaveBookQueryCmd;
 import pe.com.demo.book.domain.command.TransferBookCmd;
 import pe.com.demo.book.domain.event.AddAuthorToBookEvt;
+import pe.com.demo.book.domain.event.ErrorIncreaseStockEvt;
+import pe.com.demo.book.domain.event.ErrorSaveAuthorQueryEvt;
 import pe.com.demo.book.domain.event.ErrorSaveBookQueryEvt;
+import pe.com.demo.book.domain.event.OkIncreaseStockEvt;
+import pe.com.demo.book.domain.event.OkSaveAuthorQueryEvt;
 import pe.com.demo.book.domain.event.OkSaveBookQueryEvt;
 import pe.com.demo.book.domain.event.TransferBookEvt;
 
@@ -51,8 +60,6 @@ public class BookCommandHandler {
 		}catch(AggregateNotFoundException ex) {
 			ex.printStackTrace();
 		}
-//		eventBus.publish(GenericEventMessage.asEventMessage(new AddAuthorToBookEvt(cmd.getIdBook(), cmd.getFullname())));
-//		eventBus.publish(GenericEventMessage.asEventMessage(new AddAuthorToBookEvt(cmd.getFullname())));
 	}
 	
 	@CommandHandler
@@ -67,7 +74,7 @@ public class BookCommandHandler {
 					b.getPublish(),
 					b.getAuthors().stream().map(Author::getIdAuthor).collect(Collectors.toList()),
 					b.getAuthors().stream().map(Author::getFullname).collect(Collectors.toList()));
-					eventBus.publish(GenericEventMessage.asEventMessage(evt));
+					eventBus.publish(asEventMessage(evt));
 			});
 		}catch(AggregateNotFoundException ex) {
 			ex.printStackTrace();
@@ -75,12 +82,50 @@ public class BookCommandHandler {
 	}
 	
 	@CommandHandler
+	public void on(IncreaseStockCmd cmd) {
+		try {
+			bookRepository.increaseStock(cmd.getIdBook());
+			eventBus.publish(asEventMessage(new OkIncreaseStockEvt(cmd.getIdBook())));
+		}catch(Exception ex) {
+			eventBus.publish(asEventMessage(new ErrorIncreaseStockEvt(cmd.getIdBook())));
+		}
+	}
+	
+	// compensacion del IncreaseStockCmd
+	@CommandHandler
+	public void on(RollbackIncreaseStockCmd cmd) {
+		bookRepository.decreaseStock(cmd.getIdBook());
+	}
+	
+	@CommandHandler
 	public void on(SaveBookQueryCmd cmd) {
 		try {
-			bookRepository.saveBookQueryEvt(cmd);
-			eventBus.publish(GenericEventMessage.asEventMessage(new OkSaveBookQueryEvt(cmd.getIdBook())));
+			bookRepository.saveBookQuery(cmd);
+			eventBus.publish(asEventMessage(new OkSaveBookQueryEvt(cmd.getIdBook())));
 		}catch(Exception ex) {
-			eventBus.publish(GenericEventMessage.asEventMessage(new ErrorSaveBookQueryEvt(cmd.getIdBook())));
+			eventBus.publish(asEventMessage(new ErrorSaveBookQueryEvt(cmd.getIdBook())));
 		}
+	}
+	
+	// compensacion del SaveBookQueryCmd
+	@CommandHandler
+	public void on(RollbackSaveBookQueryCmd cmd) {
+		bookRepository.deleteBookQuery(cmd.getIdBook());
+	}
+	
+	@CommandHandler
+	public void on(SaveAuthorQueryCmd cmd) {
+		try {
+			bookRepository.saveAuthorQuery(cmd);
+			eventBus.publish(asEventMessage(new OkSaveAuthorQueryEvt(cmd.getIdBook())));
+		}catch(Exception ex) {
+			eventBus.publish(asEventMessage(new ErrorSaveAuthorQueryEvt(cmd.getIdBook())));
+		}
+	}
+	
+	// compensacion del SaveAuthorQueryCmd
+	@CommandHandler
+	public void on(RollbackSaveAuthorQueryCmd cmd) {
+		bookRepository.deleteAuthorQuery(cmd.getIdAuthors());
 	}
 }

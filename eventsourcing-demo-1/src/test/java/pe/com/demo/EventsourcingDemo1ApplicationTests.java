@@ -42,7 +42,7 @@ public class EventsourcingDemo1ApplicationTests {
 	@Ignore
 	public void test2() {
 		SaveBookQueryCmd cmd = new SaveBookQueryCmd(UUID.randomUUID().toString(), "Event sourcing", new Date(), Arrays.asList(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString()), Arrays.asList("Jhon Doe 1", "Jhon Doe 2", "Jhon Doe 3"));
-		bookRepository.saveBookQueryEvt(cmd);
+		bookRepository.saveBookQuery(cmd);
 	}
 
 	
