@@ -54,7 +54,7 @@ public class BookTransferSaga {
 		increaseStock();
 	}
 	
-	// ----------------------------- STOCK ---------------------------
+	// ----------------------------- PASO 1 ---------------------------
 	
 	@SagaEventHandler(associationProperty = "idBook")
 	public void on(OkIncreaseStockEvt evt) {
@@ -68,7 +68,7 @@ public class BookTransferSaga {
 		System.out.println("End " + SagaLifecycle.describeCurrentScope().scopeDescription());
 	}
 	
-	// ----------------------------- BOOK ---------------------------
+	// ----------------------------- PASO 2 ---------------------------
 
 	@SagaEventHandler(associationProperty = "idBook")
 	public void on(OkSaveBookQueryEvt evt) {
@@ -82,7 +82,7 @@ public class BookTransferSaga {
 		System.out.println("End " + SagaLifecycle.describeCurrentScope().scopeDescription());
 	}
 	
-	// ----------------------------- BOOK ---------------------------
+	// ----------------------------- PASO 3 ---------------------------
 	
 	@EndSaga
 	@SagaEventHandler(associationProperty = "idBook")
