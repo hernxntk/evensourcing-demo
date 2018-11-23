@@ -3,12 +3,15 @@ package pe.com.demo.book.infraestructure.repository;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.axonframework.queryhandling.QueryBus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import pe.com.demo.book.domain.aggregate.BookRepository;
 import pe.com.demo.book.domain.command.SaveAuthorQueryCmd;
 import pe.com.demo.book.domain.command.SaveBookQueryCmd;
+import pe.com.demo.book.domain.query.FetchAllBooks;
+import pe.com.demo.book.domain.query.FetchBookById;
 import pe.com.demo.book.infraestructure.document.AuthorDocument;
 import pe.com.demo.book.infraestructure.document.BookDocument;
 import pe.com.demo.book.infraestructure.document.StockDocument;
@@ -21,6 +24,8 @@ public class BookRepositoryImpl implements BookRepository {
 	private AuthorDocumentRepository authorDocumentRepository;
 	
 	private StockDocumentResository stockBookDocumentResository;
+	
+	private QueryBus queryBus;
 	
 	@Autowired
 	public void setBookDocumentRepository(BookDocumentRepository bookDocumentRepository) {
@@ -35,6 +40,11 @@ public class BookRepositoryImpl implements BookRepository {
 	@Autowired
 	public void setStockBookDocumentResository(StockDocumentResository stockBookDocumentResository) {
 		this.stockBookDocumentResository = stockBookDocumentResository;
+	}
+	
+	@Autowired
+	public void setQueryBus(QueryBus queryBus) {
+		this.queryBus = queryBus;
 	}
 	
 	@Override
@@ -56,6 +66,16 @@ public class BookRepositoryImpl implements BookRepository {
 		
 		BookDocument book = new BookDocument(cmd.getIdBook(), cmd.getTitle(), cmd.getPublish(), authors);
 		bookDocumentRepository.save(book);
+		
+		// ACTUALIZAMOS TODAS LAS QUERYS SUSCRITAS A LA CONSULTA FetchAllBooks
+		queryBus
+			.queryUpdateEmitter()
+			.emit(FetchAllBooks.class, f -> {return true;}, book);
+		
+		// ACTUALIZAMOS TODAS LAS QUERYS SUSCRITAS A LA CONSULTA FetchBookById
+		queryBus
+			.queryUpdateEmitter()
+			.emit(FetchBookById.class, f -> {return f.getIdBook().equalsIgnoreCase(book.getIdBook());}, book);
 	}
 	
 	@Override
