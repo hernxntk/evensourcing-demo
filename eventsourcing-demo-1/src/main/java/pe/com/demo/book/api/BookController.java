@@ -49,7 +49,7 @@ public class BookController {
 	@PostMapping(path = "/create-book")
 	public ResponseEntity<?> createBook(@RequestBody DtoCreateBook dto){
 		String idBook = UUID.randomUUID().toString();
-		commandGateway.send(new CreateBookCmd(idBook, dto.getTitle(), dto.getPublish(), dto.getAuthors()));
+		commandGateway.send(new CreateBookCmd(idBook, dto.getTitle(), dto.getPublish(), dto.getAuthors(), dto.getIsbn()));
 		return ResponseEntity.ok(idBook);
 	}
 	

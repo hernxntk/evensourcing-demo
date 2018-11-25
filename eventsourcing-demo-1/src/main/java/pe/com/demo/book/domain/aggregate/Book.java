@@ -14,7 +14,6 @@ import org.axonframework.spring.stereotype.Aggregate;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pe.com.demo.book.domain.command.AddAuthorToBookCmd;
 import pe.com.demo.book.domain.command.CreateBookCmd;
 import pe.com.demo.book.domain.event.AddAuthorToBookEvt;
 import pe.com.demo.book.domain.event.CreateBookEvt;
@@ -31,6 +30,8 @@ public class Book {
 	private Date publish;
 	private List<Author> authors;
 	
+	private String isbn;
+	
 	@EventHandler
 	public void on(SnapshotBookEvt snapshot) {
 		this.idBook = snapshot.getIdBook();
@@ -45,12 +46,8 @@ public class Book {
 				new CreateBookEvt(cmd.getIdBook(),
 						cmd.getTitle(),
 						cmd.getPublish(),
-						cmd.getAuthors()));
-	}
-	
-	public void on(AddAuthorToBookCmd cmd) {
-//		AggregateLifecycle.apply(new AddAuthorToBookEvt(cmd.getIdBook(), cmd.getFullname()));
-		AggregateLifecycle.apply(new AddAuthorToBookEvt(cmd.getFullname()));
+						cmd.getAuthors(),
+						cmd.getIsbn()));
 	}
 	
 	@EventSourcingHandler
@@ -58,6 +55,7 @@ public class Book {
 		this.idBook = evt.getIdBook();
 		this.title = evt.getTitle();
 		this.publish = evt.getPublish();
+		this.isbn = evt.getIsbn();
 		this.authors = new ArrayList<>();
 		if(evt.getAuthors() != null && !evt.getAuthors().isEmpty()) {
 			evt.getAuthors()
@@ -72,7 +70,6 @@ public class Book {
 	}
 	
 	public void addAuthor(String fullname) {
-		System.out.println("Fui cargado " + this.idBook + " y agregando a " + fullname);
 		AggregateLifecycle.apply(new AddAuthorToBookEvt(fullname));
 	}
 }

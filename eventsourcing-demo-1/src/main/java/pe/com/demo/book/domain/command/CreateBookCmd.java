@@ -16,4 +16,5 @@ public class CreateBookCmd {
 	private String title;
 	private Date publish;
 	private List<String> authors;
+	private String isbn;
 }
