@@ -79,14 +79,13 @@ public class BookController {
 				.defaultIfEmpty(ResponseEntity.noContent().build());
 	}
 	
-	@GetMapping(path = "/{idBook}")
+	@GetMapping(path = "/{idBook}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Mono<ResponseEntity<BookDocument>> getBookById(@PathVariable String idBook){
 		FetchBookById q = new FetchBookById(idBook);
 		
 		return Mono
 				.fromFuture(queryGateway.query(q, ResponseTypes.instanceOf(BookDocument.class)))
 				.map(book -> ResponseEntity.ok(book))
-				.onErrorMap(error -> error)
 				.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 	
@@ -101,6 +100,6 @@ public class BookController {
 		return fetchById
 				.updates()
 				.map(doc -> ResponseEntity.ok(doc))
-				.defaultIfEmpty(ResponseEntity.noContent().build());
+				.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 }

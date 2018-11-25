@@ -11,7 +11,7 @@ import pe.com.demo.book.domain.query.FetchBookById;
 import pe.com.demo.book.infraestructure.document.BookDocument;
 
 @Component
-public class BookQuery {
+public class BookQueryHandler {
 
 	private BookDocumentRepository bookDocumentRepository;
 	
