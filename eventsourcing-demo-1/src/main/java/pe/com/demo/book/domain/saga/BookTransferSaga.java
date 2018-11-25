@@ -1,6 +1,5 @@
 package pe.com.demo.book.domain.saga;
 
-
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
@@ -20,6 +19,7 @@ import pe.com.demo.book.domain.command.RollbackIncreaseStockCmd;
 import pe.com.demo.book.domain.command.RollbackSaveBookQueryCmd;
 import pe.com.demo.book.domain.command.SaveAuthorQueryCmd;
 import pe.com.demo.book.domain.command.SaveBookQueryCmd;
+import pe.com.demo.book.domain.command.UpdateAllSubscriptionQueryCmd;
 import pe.com.demo.book.domain.event.ErrorIncreaseStockEvt;
 import pe.com.demo.book.domain.event.ErrorSaveAuthorQueryEvt;
 import pe.com.demo.book.domain.event.ErrorSaveBookQueryEvt;
@@ -28,7 +28,6 @@ import pe.com.demo.book.domain.event.OkSaveAuthorQueryEvt;
 import pe.com.demo.book.domain.event.OkSaveBookQueryEvt;
 import pe.com.demo.book.domain.event.TransferBookEvt;
 
-//@Saga(sagaStore = "bookTransferSagaStore")
 @Saga
 @Getter
 @Setter
@@ -88,6 +87,7 @@ public class BookTransferSaga {
 	@SagaEventHandler(associationProperty = "idBook")
 	public void on(OkSaveAuthorQueryEvt evt) {
 		// FINALIZANDO SAGA OK
+		updateAllSubscriptionQuerys();
 		System.out.println("End " + SagaLifecycle.describeCurrentScope().scopeDescription());
 	}
 	
@@ -119,7 +119,8 @@ public class BookTransferSaga {
 		this.commandBus.dispatch(asCommandMessage(new RollbackSaveBookQueryCmd(data.getIdBook())));
 	}
 	
-//	private void rollbackAuthorQuery() {
-//		this.commandBus.dispatch(asCommandMessage(new RollbackSaveAuthorQueryCmd(this.data.getIdBook(), this.data.getIdAuthors())));
-//	}
+	private void updateAllSubscriptionQuerys() {
+		this.commandBus.dispatch(asCommandMessage(new UpdateAllSubscriptionQueryCmd(data.getIdBook())));
+	}
+
 }

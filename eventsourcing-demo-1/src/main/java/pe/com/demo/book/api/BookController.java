@@ -22,8 +22,8 @@ import pe.com.demo.book.api.request.DtoCreateBook;
 import pe.com.demo.book.domain.command.AddAuthorToBookCmd;
 import pe.com.demo.book.domain.command.CreateBookCmd;
 import pe.com.demo.book.domain.command.TransferBookCmd;
-import pe.com.demo.book.domain.query.FetchAllBooks;
-import pe.com.demo.book.domain.query.FetchBookById;
+import pe.com.demo.book.domain.query.FetchAllBooksQry;
+import pe.com.demo.book.domain.query.FetchBookByIdQry;
 import pe.com.demo.book.infraestructure.document.BookDocument;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -67,7 +67,7 @@ public class BookController {
 	
 	@GetMapping(path = "/reactive-book", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<ResponseEntity<BookDocument>> reactiveGetAllBooks(){
-		FetchAllBooks q = new FetchAllBooks();
+		FetchAllBooksQry q = new FetchAllBooksQry();
 		SubscriptionQueryResult<BookDocument, BookDocument> fetchAll = queryGateway
 				.subscriptionQuery(q,
 						ResponseTypes.instanceOf(BookDocument.class),
@@ -81,7 +81,7 @@ public class BookController {
 	
 	@GetMapping(path = "/{idBook}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Mono<ResponseEntity<BookDocument>> getBookById(@PathVariable String idBook){
-		FetchBookById q = new FetchBookById(idBook);
+		FetchBookByIdQry q = new FetchBookByIdQry(idBook);
 		
 		return Mono
 				.fromFuture(queryGateway.query(q, ResponseTypes.instanceOf(BookDocument.class)))
@@ -91,7 +91,7 @@ public class BookController {
 	
 	@GetMapping(path = "/reactive-book/{idBook}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<ResponseEntity<BookDocument>> reactiveGetBookById(@PathVariable String idBook){
-		FetchBookById q = new FetchBookById(idBook);
+		FetchBookByIdQry q = new FetchBookByIdQry(idBook);
 		SubscriptionQueryResult<BookDocument, BookDocument> fetchById = queryGateway
 				.subscriptionQuery(q,
 						ResponseTypes.instanceOf(BookDocument.class),

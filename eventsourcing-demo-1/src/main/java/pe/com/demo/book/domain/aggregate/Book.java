@@ -18,6 +18,7 @@ import pe.com.demo.book.domain.command.AddAuthorToBookCmd;
 import pe.com.demo.book.domain.command.CreateBookCmd;
 import pe.com.demo.book.domain.event.AddAuthorToBookEvt;
 import pe.com.demo.book.domain.event.CreateBookEvt;
+import pe.com.demo.book.domain.event.SnapshotBookEvt;
 
 @Aggregate(snapshotTriggerDefinition = "clasicSnapShotter")
 @NoArgsConstructor
@@ -28,15 +29,25 @@ public class Book {
 	private String idBook;
 	private String title;
 	private Date publish;
-	
 	private List<Author> authors;
+	
+	@EventHandler
+	public void on(SnapshotBookEvt snapshot) {
+		this.idBook = snapshot.getIdBook();
+		this.publish = snapshot.getPublish();
+		this.title = snapshot.getTitle();
+		this.authors = snapshot.getAuthors();
+	}
 	
 	@CommandHandler
 	public Book(CreateBookCmd cmd) {
-		AggregateLifecycle.apply(new CreateBookEvt(cmd.getIdBook(), cmd.getTitle(), cmd.getPublish(), cmd.getAuthors()));
+		AggregateLifecycle.apply(
+				new CreateBookEvt(cmd.getIdBook(),
+						cmd.getTitle(),
+						cmd.getPublish(),
+						cmd.getAuthors()));
 	}
 	
-//	@CommandHandler
 	public void on(AddAuthorToBookCmd cmd) {
 //		AggregateLifecycle.apply(new AddAuthorToBookEvt(cmd.getIdBook(), cmd.getFullname()));
 		AggregateLifecycle.apply(new AddAuthorToBookEvt(cmd.getFullname()));
@@ -57,10 +68,6 @@ public class Book {
 	
 	@EventSourcingHandler
 	public void on(AddAuthorToBookEvt evt) {
-//		if(this.authors == null) {
-//			this.authors = new ArrayList<>();
-//		}
-//		this.authors.clear();
 		this.authors.add(new Author(UUID.randomUUID().toString(), evt.getFullname()));
 	}
 	

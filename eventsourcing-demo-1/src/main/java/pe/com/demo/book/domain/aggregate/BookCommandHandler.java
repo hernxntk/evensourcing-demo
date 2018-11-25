@@ -20,6 +20,7 @@ import pe.com.demo.book.domain.command.RollbackSaveBookQueryCmd;
 import pe.com.demo.book.domain.command.SaveAuthorQueryCmd;
 import pe.com.demo.book.domain.command.SaveBookQueryCmd;
 import pe.com.demo.book.domain.command.TransferBookCmd;
+import pe.com.demo.book.domain.command.UpdateAllSubscriptionQueryCmd;
 import pe.com.demo.book.domain.event.AddAuthorToBookEvt;
 import pe.com.demo.book.domain.event.ErrorIncreaseStockEvt;
 import pe.com.demo.book.domain.event.ErrorSaveAuthorQueryEvt;
@@ -28,6 +29,7 @@ import pe.com.demo.book.domain.event.OkIncreaseStockEvt;
 import pe.com.demo.book.domain.event.OkSaveAuthorQueryEvt;
 import pe.com.demo.book.domain.event.OkSaveBookQueryEvt;
 import pe.com.demo.book.domain.event.TransferBookEvt;
+import pe.com.demo.book.domain.event.UpdateAllSubscriptionQueryEvt;
 
 //@AllArgsConstructor
 @Component
@@ -127,5 +129,12 @@ public class BookCommandHandler {
 	@CommandHandler
 	public void on(RollbackSaveAuthorQueryCmd cmd) {
 		bookRepository.deleteAuthorQuery(cmd.getIdAuthors());
+	}
+
+	
+	// actualizamos todas las subscripciones
+	@CommandHandler
+	public void on(UpdateAllSubscriptionQueryCmd cmd) {
+		eventBus.publish(asEventMessage(new UpdateAllSubscriptionQueryEvt(cmd.getIdBook())));
 	}
 }
